@@ -1,4 +1,4 @@
-TARGET=blink
+TARGET=wheel
 
 ifeq (,$(TOOLCHAIN_PREFIX))
 $(error TOOLCHAIN_PREFIX is not set)
