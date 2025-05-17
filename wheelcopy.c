@@ -62,7 +62,7 @@
 #define LINE_SENSOR7 20    // 右侧传感器
 #define LINE_SENSOR8 21    // 最右侧传感器
 
-#define LINE_FOLLOWER_SPEED 900000  // 增加到最大速度
+#define LINE_FOLLOWER_SPEED 1000000  // 增加到最大速度
 #define MIN_SPEED 500000     // 提高最小速度，确保有足够的动力
 #define MAX_SPEED 1000000    // 最大速度
 #define SMOOTH_FACTOR 0.4    // 增加平滑因子，使速度变化更快
@@ -421,11 +421,9 @@ void line_following(int runtime_seconds) {
             // 根据误差大小动态调整基础速度
             int base_speed = LINE_FOLLOWER_SPEED;
             if (is_sharp_turn || abs(error) >= 5) {  // 直角弯或大转弯时
-                base_speed = LINE_FOLLOWER_SPEED;  // 保持较高速度
+                base_speed = LINE_FOLLOWER_SPEED * 0.8;  // 保持较高速度
             } else if (abs(error) >= 3) {  // 中等转弯
                 base_speed = LINE_FOLLOWER_SPEED * 0.8;
-            } else if (abs(error) <= 1) {  // 接近直行时降低速度
-                base_speed = LINE_FOLLOWER_SPEED;  // 直行时使用70%的速度
             }
             
             // 计算左右轮速度
@@ -480,18 +478,18 @@ void line_following(int runtime_seconds) {
             smooth_speed_change(left_speed, right_speed);
             
             // 只在误差或速度发生显著变化时输出
-            // if (abs(error - last_error) >= 1 || 
-            //     abs(left_speed - last_left_speed) > 100000 || 
-            //     abs(right_speed - last_right_speed) > 100000) {
-            //     printf("Error: %d, Left: %d, Right: %d\n", error, left_speed, right_speed);
-            //     fflush(stdout);
-            //     last_left_speed = left_speed;
-            //     last_right_speed = right_speed;
-            // }
+            if (abs(error - last_error) >= 1 || 
+                abs(left_speed - last_left_speed) > 100000 || 
+                abs(right_speed - last_right_speed) > 100000) {
+                printf("Error: %d, Left: %d, Right: %d\n", error, left_speed, right_speed);
+                fflush(stdout);
+                last_left_speed = left_speed;
+                last_right_speed = right_speed;
+            }
             
             last_error = error;
         }
-        usleep(1000);  // 1ms控制周期
+        usleep(10000);  // 10ms控制周期
     }
     
     // 停止小车
@@ -549,8 +547,8 @@ int main() {
     // test_gpio();
     // hcsr04_test();
     
-    obstacle_avoidance(10);
-    // line_following(65);
+    // obstacle_avoidance(30);
+    line_following(30);
     reset();
     return 0;
 }
